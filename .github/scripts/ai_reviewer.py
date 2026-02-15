@@ -24,10 +24,33 @@ def review_pr():
     print(f"Starting review for PR #{pr_number} in {repo_name}...")
 
     genai.configure(api_key=ai_api_key)
-    # Using 'gemini-1.5-flash' since 'gemini-2.0-flash-exp' might not be stable for all keys yet, 
-    # but let's stick to what the user intended if possible or fallback. 
-    # Actually, let's use a very standard model name.
-    model = genai.GenerativeModel('gemini-1.5-flash') 
+    # Select available model with fallback logic
+    candidates = ['gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
+    model = None
+    
+    print("Checking available models...")
+    for candidate in candidates:
+        try:
+            print(f"Testing model: {candidate}...")
+            test_model = genai.GenerativeModel(candidate)
+            # Minimal generation to verify access
+            test_model.generate_content("Ping", generation_config={"max_output_tokens": 5})
+            print(f"✅ Successfully connected to {candidate}")
+            model = test_model
+            break
+        except Exception as e:
+            print(f"⚠️ Failed to use {candidate}: {e}")
+            
+    if not model:
+        print("❌ CRITICAL ERROR: Could not connect to any Gemini model.")
+        print("Listing available models for this API key:")
+        try:
+            for m in genai.list_models():
+                if 'generateContent' in m.supported_generation_methods:
+                    print(f"- {m.name}")
+        except Exception as e:
+            print(f"Could not list models: {e}")
+        exit(1) 
 
     # Get PR diff/files
     headers = {
