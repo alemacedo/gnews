@@ -25,7 +25,14 @@ def review_pr():
 
     genai.configure(api_key=ai_api_key)
     # Select available model with fallback logic
-    candidates = ['gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
+    # Updated based on available models log
+    candidates = [
+        'gemini-2.0-flash', 
+        'gemini-2.5-flash', 
+        'gemini-flash-latest',
+        'gemini-1.5-flash',
+        'gemini-pro'
+    ]
     model = None
     
     print("Checking available models...")
