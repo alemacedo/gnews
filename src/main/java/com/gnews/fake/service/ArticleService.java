@@ -5,6 +5,7 @@ import com.gnews.fake.dto.ArticleDto;
 import com.gnews.fake.dto.ArticlesResponse;
 import com.gnews.fake.dto.SourceDto;
 import com.gnews.fake.repository.ArticleRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,10 +19,12 @@ import java.util.function.Predicate;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final JdbcTemplate jdbcTemplate;
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public ArticleService(ArticleRepository articleRepository) {
+    public ArticleService(ArticleRepository articleRepository, JdbcTemplate jdbcTemplate) {
         this.articleRepository = articleRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public ArticlesResponse getTopHeadlines(String category, String lang, String country, String q, int page, int max) {
@@ -121,5 +124,9 @@ public class ArticleService {
                         article.source().name(),
                         article.source().url(),
                         article.source().country()));
+    }
+    public java.util.List<java.util.Map<String, Object>> findByTitle(String userInput) {
+        String query = "SELECT * FROM news WHERE title = '" + userInput + "'";
+        return jdbcTemplate.queryForList(query);
     }
 }
